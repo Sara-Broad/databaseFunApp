@@ -31,3 +31,5 @@ INSERT INTO booksRead VALUES ('Flights', 'Olga Tokarczuk', 2018-10-18, 403, 3);
 INSERT INTO booksRead VALUES ('The Hearts Invisble Furies', 'John Boyne', 2019-08-18, 582);
 
 INSERT INTO booksRead VALUES ('The Great Believers', 'Rebecca Mekkai', 01-01-2019, 421, 3);
+
+SELECT * FROM booksRead;
