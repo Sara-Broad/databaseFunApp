@@ -37,6 +37,14 @@ function afterConnection() {
       client.end();
     });
   }
+
+  // query ratings
+  // add new book
+  // change book rating
+  // remove book
+  // other books by author? (different table)
+
+
 // client.query('SELECT NOW()', (err, res) => {
 //     console.log(err, res)
 //     client.end()
@@ -55,12 +63,5 @@ function afterConnection() {
 //     }
 // })
 
-// function selectAll() {
-//     client.query('SELECT * FROM booksRead', function(err, res) {
-//         if (err) throw err
-//         console.log(res)
-//         client.end()
-//     })
-// }
 
-// selectAll();
+
