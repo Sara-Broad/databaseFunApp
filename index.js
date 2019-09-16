@@ -31,7 +31,7 @@ client.connect(function(err) {
 
 
 function afterConnection() {
-    client.query("SELECT * FROM booksread", function(err, res) {
+    client.query("SELECT * FROM booksRead", function(err, res) {
       if (err) throw err;
       console.log(res);
       client.end();
