@@ -37,13 +37,12 @@ client.connect(function (err) {
 function loadBooks() {
     client.query("SELECT * FROM booksRead", function (err, res) {
         if (err) throw err;
-        // console.log(res.rows);
-        loadOptions(res);
+        loadOptions(res.rows);
         client.end();
     });
 }
 
-function loadOptions() {
+function loadOptions(books) {
     inquirer
         .prompt([{
             type: 'list',
@@ -56,14 +55,20 @@ function loadOptions() {
                 'Change book rating',
                 'Remove a book',
                 'Add a new book'
-            ],
-            filter: function (val) {
-                return val.toLowerCase();
-            }
+            ]
         }])
         .then(answers => {
-            console.log(JSON.stringify(answers, null, ' '))
+            // console.log(JSON.stringify(answers, null, ' '))
+            switch(answers.choice) {
+                case 'View the book list':
+                    console.log(books)
+                    loadBooks()
+                    break;
+                default:
+                text = "Happy reading!";
+            }
         })
 }
 
+// add a book - do you have all the info you need or do you want to query the API?
 // other books by author? query a book api? (different table)
