@@ -1,4 +1,8 @@
-const { Pool, Client } = require('pg')
+const {
+    Pool,
+    Client
+} = require('pg')
+const inquirer = require('inquirer')
 require('dotenv').config()
 
 const pool = new Pool({
@@ -11,7 +15,7 @@ const pool = new Pool({
 
 pool.query('SELECT NOW()', (err, res) => {
     if (err) throw err;
-    console.log(res)
+    // console.log(res)
     pool.end()
 })
 
@@ -23,45 +27,43 @@ const client = new Client({
     port: 5433
 })
 
-client.connect(function(err) {
+client.connect(function (err) {
     if (err) throw err;
     // console.log("connected as id " + connection.threadId);
-    afterConnection();
+    loadBooks();
 })
 
 
-function afterConnection() {
-    client.query("SELECT * FROM booksRead", function(err, res) {
-      if (err) throw err;
-      console.log(res);
-      client.end();
+function loadBooks() {
+    client.query("SELECT * FROM booksRead", function (err, res) {
+        if (err) throw err;
+        // console.log(res.rows);
+        loadOptions(res);
+        client.end();
     });
-  }
+}
 
-  // query ratings
-  // add new book
-  // change book rating
-  // remove book
-  // other books by author? (different table)
+function loadOptions() {
+    inquirer
+        .prompt([{
+            type: 'list',
+            name: 'choice',
+            message: 'What do you want to do?',
+            choices: [
+                'View the book list',
+                'View books from highest to lowest rating',
+                'View books from lowest to highest rating',
+                'Change book rating',
+                'Remove a book',
+                'Add a new book'
+            ],
+            filter: function (val) {
+                return val.toLowerCase();
+            }
+        }])
+        .then(answers => {
+            console.log(JSON.stringify(answers, null, ' '))
+        })
+}
 
-
-// client.query('SELECT NOW()', (err, res) => {
-//     console.log(err, res)
-//     client.end()
-// })
-
-// client
-//   .query('SELECT NOW() as now')
-//   .then(res => console.log(res.rows[0]))
-//   .catch(e => console.error(e.stack))
-
-// client.query('SELECT NOW()', (err, res) => {
-//     if (err) {
-//         console.log(err.stack)
-//     } else {
-//         console.log(res.rows)
-//     }
-// })
-
-
-
+// other books by author? query a book api? (different table)
