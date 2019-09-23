@@ -31,7 +31,6 @@ client.connect(function (err) {
     if (err) throw err;
     // console.log("connected as id " + connection.threadId);
     loadBooks();
-    highestToLowest()
 })
 
 
@@ -41,6 +40,8 @@ function loadBooks() {
         // loadOptions(res.rows);
         // client.end();
         console.log(res.rows)
+        changeRating();
+
     });
 }
 
@@ -94,9 +95,6 @@ function highestToLowest() {
     })
 }
 
-// highestToLowest()
-
-
 function lowestToHighest() {
     client.query("SELECT title, rating FROM booksRead ORDER BY rating ASC", function (err, res) {
         if (err) throw err;
@@ -104,12 +102,41 @@ function lowestToHighest() {
     })
 }
 
-function changeRating() {
-    // get book title 
-    // change rating
-    // put?
 
+function changeRating() {
+    inquirer
+      .prompt([
+        //   {
+        //       type: "input",
+        //       name: "title",
+        //       message: "Title for rating change?"
+        //   },
+          {
+              type: "input",
+              name: "rating",
+              message: "What is the new rating?",
+            //   validate: function(val) {
+            //       return val > 0 && val < 5
+            //   }
+          }
+      ]).then(function(val) {
+        console.log('val', val)
+        client.query(
+            "UPDATE booksRead SET rating = ? WHERE title = 'The Shining'", function (err) {
+            if (err) throw err;
+            // check to see if the rating is the same
+            // console.log('val title', val.title)
+            // console.log('val rating', val.rating)
+        })
+      }) 
 }
+
+// function changeRating() {
+//     client.query("UPDATE booksRead SET rating = 1 WHERE title = 'The Shining'", function (err, res) {
+//         if (err) throw err;
+//         console.log(res)
+//     })
+// }
 
 function removeBook() {
 
