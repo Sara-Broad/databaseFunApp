@@ -1,17 +1,11 @@
-// client.query('SELECT NOW()', (err, res) => {
-//     console.log(err, res)
-//     client.end()
-// })
+function removeBook(id) {
+    client.query("DELETE FROM booksreads WHERE id=$1",
+       [id],
+       function (err, res) {
+       console.log('Deleted')
+       }
+   )
+}
 
-// client
-//   .query('SELECT NOW() as now')
-//   .then(res => console.log(res.rows[0]))
-//   .catch(e => console.error(e.stack))
-
-// client.query('SELECT NOW()', (err, res) => {
-//     if (err) {
-//         console.log(err.stack)
-//     } else {
-//         console.log(res.rows)
-//     }
-// })
+// add a book - do you have all the info you need or do you want to query the API?
+// other books by author? query a book api? (different table)

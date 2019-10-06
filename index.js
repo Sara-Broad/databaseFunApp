@@ -15,7 +15,6 @@ const pool = new Pool({
 
 pool.query('SELECT NOW()', (err, res) => {
     if (err) throw err;
-    // console.log(res)
     pool.end()
 })
 
@@ -27,25 +26,107 @@ const client = new Client({
     port: 5433
 })
 
-client.connect(function (err) {
+client.connect(function (err, res) {
     if (err) throw err;
-    // console.log("connected as id " + connection.threadId);
-    loadBooks();
+    // loadBooks()
+    // topBooks(5)
+    // updateRating(5, 'Born a Crime')
+    // addBook(12, 'The Body Papers', 'Grace Talusan', '2019-07-19', 250, 5)
+    // removeBook(12)
+    checkDelete(12)
 })
 
 
 function loadBooks() {
-    client.query("SELECT * FROM booksRead", function (err, res) {
+    client.query("SELECT * FROM booksreads", function (err, res) {
         if (err) throw err;
-        // loadOptions(res.rows);
-        // client.end();
-        console.log(res.rows)
-        changeRating();
-
+        // const resResult = res.rows
+        console.log('first load', res.rows)
+        //   for (var i = 0; i < resResult.length; i++) {
+        //     var obj = resResult[i];
+        //     console.log(obj);
+        //     }
     });
 }
 
+function reloadBooks() {
+  client.query("SELECT * FROM booksreads", function (err, res) {
+      if (err) throw err;
+      console.log('second load', res.rows)
+      client.end()
+  });
+}
+
+function topBooks(rating) {
+    // console.log('rating', rating)
+    client.query("SELECT * FROM booksreads WHERE rating=$1",
+    [rating],
+    function (err, res) {
+        console.log('res', res.rows)
+        }
+    )
+}
+
+function updateRating(rating, title) {
+  client.query(
+     "UPDATE booksreads SET rating=$1 WHERE title=$2",
+     [rating, title],
+     function(err, res) {
+       console.log(`Updated the book ${title} with a rating of ${rating}`)
+    //    reloadBooks();
+     }
+   );
+ }
+
+function addBook(id, title, author, dateFinished, pages, rating) {
+    client.query(
+        "INSERT INTO booksreads(id, title, author, dateFinished, pages, rating) VALUES ($1, $2, $3, $4, $5, $6)",
+        [id, title, author, dateFinished, pages, rating],
+        function (err, res) {
+            console.log('This book was added', res)
+            reloadBooks()
+        }
+    )
+}
+
+function checkDelete(id) {
+    const bookId = id;
+    console.log('bookId', bookId)
+    client.query("SELECT * FROM booksreads", function (err, res) {
+        const resResults = res.rows
+        const arrayCheck = resResults.some(resResult => resResult.id === bookId)
+        console.log(arrayCheck)
+            if (arrayCheck == false) {
+                console.log('This book is not on your list.')
+            } else {
+                client.query("DELETE FROM booksreads WHERE id=$1",
+                [id],
+                function (err, res) {
+                    console.log(res)
+                console.log('Deleted')
+                }
+             ) 
+            }
+    });
+}
+
+function highestToLowest() {
+    client.query("SELECT title, rating FROM booksreads ORDER BY rating DESC", function (err, res) {
+        if (err) throw err;
+        console.log('Highest to lowest rated books:', res.rows)
+    })
+}
+
+function lowestToHighest() {
+    client.query("SELECT title, rating FROM booksRead ORDER BY rating ASC", function (err, res) {
+        if (err) throw err;
+        console.log('Lowest to highest rated books:', res.rows)
+    })
+}
+ 
 // function loadOptions(books) {
+//   console.log(books)
+//   // console.log(books)
 //     inquirer
 //      .prompt([{
 //             type: 'list',
@@ -61,10 +142,10 @@ function loadBooks() {
 //             ]
 //         }])
 //         .then(answers => {
-//             // console.log(JSON.stringify(answers, null, ' '))
+//             // console.log(JSON.stringify(answers, null, ''))
 //             switch (answers.choice) {
 //                 case 'View the book list':
-//                     console.log(books)
+//                     console.table(books)
 //                     loadBooks()
 //                     break;
 //                 case 'View books from highest to lowest rating':
@@ -75,6 +156,8 @@ function loadBooks() {
 //                     break;
 //                 case 'Change book rating':
 //                     // do something
+//                     // changeBookRating(books)
+//                     changeBookRating(books)
 //                     break;
 //                 case 'Remove a book':
 //                     // do something
@@ -88,63 +171,30 @@ function loadBooks() {
 //         })
 //     }
 
-function highestToLowest() {
-    client.query("SELECT title, rating FROM booksRead ORDER BY rating DESC", function (err, res) {
-        if (err) throw err;
-        console.log('Highest to lowest rated books:', res.rows)
-    })
-}
+  //   function changeBookRating(book) {
+  //     inquirer
+  //       .prompt([
+  //         //   {
+  //         //       type: "input",
+  //         //       name: "title",
+  //         //       message: "Title for rating change?"
+  //         //   },
+  //           {
+  //               type: "input",
+  //               name: "rating",
+  //               message: "What is the new rating?",
+  //               validate: function(val) {
+  //                   return val > 0 && val < 5
+  //               }
+  //           }
+  //       ]).then(function(val) {
+  //         console.log('input val', val)
+  //         var ratingInt = parseInt(val.rating)
+  //         console.log('ratingInt', ratingInt)
+  //         changeRating(val)
+  //         // shining()
 
-function lowestToHighest() {
-    client.query("SELECT title, rating FROM booksRead ORDER BY rating ASC", function (err, res) {
-        if (err) throw err;
-        console.log('Lowest to highest rated books:', res.rows)
-    })
-}
+  //       }) 
+  // }
+  
 
-
-function changeRating() {
-    inquirer
-      .prompt([
-        //   {
-        //       type: "input",
-        //       name: "title",
-        //       message: "Title for rating change?"
-        //   },
-          {
-              type: "input",
-              name: "rating",
-              message: "What is the new rating?",
-            //   validate: function(val) {
-            //       return val > 0 && val < 5
-            //   }
-          }
-      ]).then(function(val) {
-        console.log('val', val)
-        client.query(
-            "UPDATE booksRead SET rating = ? WHERE title = 'The Shining'", function (err) {
-            if (err) throw err;
-            // check to see if the rating is the same
-            // console.log('val title', val.title)
-            // console.log('val rating', val.rating)
-        })
-      }) 
-}
-
-// function changeRating() {
-//     client.query("UPDATE booksRead SET rating = 1 WHERE title = 'The Shining'", function (err, res) {
-//         if (err) throw err;
-//         console.log(res)
-//     })
-// }
-
-function removeBook() {
-
-}
-
-function addBook() {
-    
-}
-
-// add a book - do you have all the info you need or do you want to query the API?
-// other books by author? query a book api? (different table)

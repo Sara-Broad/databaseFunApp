@@ -4,7 +4,7 @@ CREATE DATABASE books_db;
 
 USE books_db;
 
-CREATE TABLE booksRead (
+CREATE TABLE booksReads (
     id int PRIMARY KEY,
     title varchar(80),
     author varchar(80),
