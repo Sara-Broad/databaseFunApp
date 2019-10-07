@@ -28,7 +28,7 @@ const client = new Client({
 
 client.connect(function (err, res) {
     if (err) throw err;
-    // loadBooks()
+    loadBooks()
     // topBooks(5)
     // updateRating(5, 'Born a Crime')
     // addBook(12, 'The Body Papers', 'Grace Talusan', '2019-07-19', 250, 5)
