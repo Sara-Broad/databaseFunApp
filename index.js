@@ -67,6 +67,7 @@ function topBooks(rating) {
     )
 }
 
+// add check to see if rating is different
 function updateRating(rating, title) {
   client.query(
      "UPDATE booksreads SET rating=$1 WHERE title=$2",
@@ -96,7 +97,7 @@ function checkDelete(id) {
         const resResults = res.rows
         const arrayCheck = resResults.some(resResult => resResult.id === bookId)
         console.log(arrayCheck)
-            if (arrayCheck == false) {
+            if (arrayCheck && arrayCheck.length >= 1) {
                 console.log('This book is not on your list.')
             } else {
                 client.query("DELETE FROM booksreads WHERE id=$1",

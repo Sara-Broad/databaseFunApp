@@ -16,16 +16,27 @@ describe('load books function', function () {
             pages: 464,
             rating: 5 }]         
 
-           
-
         assert.typeOf(books, 'array', 'We have an array')
-        // assert.hasAllKeys({foo: 1, bar: 2, baz: 3}, ['foo', 'bar', 'baz ']);
-        assert.hasAllKeys(books, ['id', 'title', 'author', 'dateFinished', 'pages', 'rating'])
     })
 }) 
 
 describe('add books function', function () {
-    it('should be added with values for all columns', function () {
+    it('should contain a value for each column', function () {
+        const keysObject = 
+            {   id: 3,
+                title: 'The Buried',
+                author: 'Peter Hessler',
+                dateFinished: '2019-05-22T',
+                pages: 480,
+                rating: 5 
+            }
+
+    assert.hasAllKeys(keysObject, ['id', 'title', 'author', 'dateFinished', 'pages', 'rating'])
+    })
+})
+
+describe('update ratings function', function () {
+    it('should have a new rating that is different from the current rating', function () {
 
     })
 })
