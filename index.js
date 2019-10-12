@@ -3,6 +3,7 @@ const {
     Client
 } = require('pg')
 const inquirer = require('inquirer')
+const perf = require('execution-time')();
 require('dotenv').config()
 
 const pool = new Pool({
@@ -30,10 +31,10 @@ client.connect(function (err, res) {
     if (err) throw err;
     loadBooks()
     // topBooks(5)
-    // updateRating(5, 'Born a Crime')
-    // addBook(12, 'The Body Papers', 'Grace Talusan', '2019-07-19', 250, 5)
+    updateRating(3, 'Born a Crime')
+    // addBook(14, 'The Body Papers', 'Grace Talusan', '2019-07-19', 250, 5)
     // removeBook(12)
-    checkDelete(12)
+    // checkDelete(12)
 })
 
 
@@ -49,45 +50,76 @@ function loadBooks() {
     });
 }
 
+// execution time logger
+perf.start()
+const results = perf.stop()
+console.log('time: ', results.time)
+
 function reloadBooks() {
-  client.query("SELECT * FROM booksreads", function (err, res) {
-      if (err) throw err;
-      console.log('second load', res.rows)
-      client.end()
-  });
+    client.query("SELECT * FROM booksreads", function (err, res) {
+        if (err) throw err;
+        console.log('Reloaded Books: ', res.rows)
+        client.end()
+    });
 }
 
 function topBooks(rating) {
     // console.log('rating', rating)
     client.query("SELECT * FROM booksreads WHERE rating=$1",
-    [rating],
-    function (err, res) {
-        console.log('res', res.rows)
+        [rating],
+        function (err, res) {
+            // console.log('res', res.rows)
+            const topBooksResult = res.rows
+            topBooksResult.forEach(element => console.log(`${element.title} is rated a ${rating}`))
         }
     )
 }
 
-// add check to see if rating is different
 function updateRating(rating, title) {
-  client.query(
-     "UPDATE booksreads SET rating=$1 WHERE title=$2",
-     [rating, title],
-     function(err, res) {
-       console.log(`Updated the book ${title} with a rating of ${rating}`)
-    //    reloadBooks();
-     }
-   );
- }
+    const bookRating = rating;
+    const bookTitle = title;
+    client.query("SELECT * FROM booksreads WHERE title=$1", 
+    [title],
+    function (err, res) {
+        const resResults = res.rows
+        resResults.forEach((element) => {
+            // console.log(element.rating)
+            if (element.rating == bookRating) {
+                console.log('This is the same rating.')
+                throw err
+            } else {
+                client.query(
+                    "UPDATE booksreads SET rating=$1 WHERE title=$2",
+                    [rating, title],
+                    function (err, res) {
+                        console.log(`Updated the book ${title} with a rating of ${rating}`)
+                           reloadBooks();
+                    }
+                );
+            }
+        })
+    })
+}
 
 function addBook(id, title, author, dateFinished, pages, rating) {
-    client.query(
-        "INSERT INTO booksreads(id, title, author, dateFinished, pages, rating) VALUES ($1, $2, $3, $4, $5, $6)",
-        [id, title, author, dateFinished, pages, rating],
-        function (err, res) {
-            console.log('This book was added', res)
-            reloadBooks()
+    const addBookRating = rating;
+    console.log(addBookRating)
+    function checkError(err, callback) {
+        if (addBookRating > 5) {
+            console.log('Please choose a rating between 1 and 5')
+            throw err
+        } else {
+            client.query(
+                "INSERT INTO booksreads(id, title, author, dateFinished, pages, rating) VALUES ($1, $2, $3, $4, $5, $6)",
+                [id, title, author, dateFinished, pages, rating],
+                function (err, res) {
+                    console.log(`${title} was added`)
+                    // reloadBooks()
+                }
+            )
         }
-    )
+    }
+    checkError()
 }
 
 function checkDelete(id) {
@@ -97,17 +129,17 @@ function checkDelete(id) {
         const resResults = res.rows
         const arrayCheck = resResults.some(resResult => resResult.id === bookId)
         console.log(arrayCheck)
-            if (arrayCheck && arrayCheck.length >= 1) {
-                console.log('This book is not on your list.')
-            } else {
-                client.query("DELETE FROM booksreads WHERE id=$1",
+        if (arrayCheck && arrayCheck.length >= 1) {
+            console.log('This book is not on your list.')
+        } else {
+            client.query("DELETE FROM booksreads WHERE id=$1",
                 [id],
                 function (err, res) {
                     console.log(res)
-                console.log('Deleted')
+                    console.log('Deleted')
                 }
-             ) 
-            }
+            )
+        }
     });
 }
 
@@ -124,7 +156,7 @@ function lowestToHighest() {
         console.log('Lowest to highest rated books:', res.rows)
     })
 }
- 
+
 // function loadOptions(books) {
 //   console.log(books)
 //   // console.log(books)
@@ -172,30 +204,28 @@ function lowestToHighest() {
 //         })
 //     }
 
-  //   function changeBookRating(book) {
-  //     inquirer
-  //       .prompt([
-  //         //   {
-  //         //       type: "input",
-  //         //       name: "title",
-  //         //       message: "Title for rating change?"
-  //         //   },
-  //           {
-  //               type: "input",
-  //               name: "rating",
-  //               message: "What is the new rating?",
-  //               validate: function(val) {
-  //                   return val > 0 && val < 5
-  //               }
-  //           }
-  //       ]).then(function(val) {
-  //         console.log('input val', val)
-  //         var ratingInt = parseInt(val.rating)
-  //         console.log('ratingInt', ratingInt)
-  //         changeRating(val)
-  //         // shining()
+//   function changeBookRating(book) {
+//     inquirer
+//       .prompt([
+//         //   {
+//         //       type: "input",
+//         //       name: "title",
+//         //       message: "Title for rating change?"
+//         //   },
+//           {
+//               type: "input",
+//               name: "rating",
+//               message: "What is the new rating?",
+//               validate: function(val) {
+//                   return val > 0 && val < 5
+//               }
+//           }
+//       ]).then(function(val) {
+//         console.log('input val', val)
+//         var ratingInt = parseInt(val.rating)
+//         console.log('ratingInt', ratingInt)
+//         changeRating(val)
+//         // shining()
 
-  //       }) 
-  // }
-  
-
+//       }) 
+// }
