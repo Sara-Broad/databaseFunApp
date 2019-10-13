@@ -36,7 +36,16 @@ describe('add books function', function () {
 })
 
 describe('update ratings function', function () {
-    it('should have a new rating that is different from the current rating', function () {
+    it('should be a number', function () {
+        const newRating = 5
 
+        assert.typeOf(newRating, 'number', 'we have a number')
+    })
+    it('should have a new rating that is different from the current rating', function () {
+        const currentRating = 3
+        const attemptedNewRating = 3
+        const newRating = 5
+
+        assert.notEqual(currentRating, newRating, 'the values are different');
     })
 })
