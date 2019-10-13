@@ -3,4 +3,4 @@ This app uses the following:
 - Postgres
 - Node 
 - Mocha/Chai
-- execution-time
+- Execution-time
